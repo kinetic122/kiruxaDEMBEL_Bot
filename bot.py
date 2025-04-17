@@ -4,8 +4,14 @@ from datetime import datetime
 import asyncio
 import os
 
-TOKEN = os.getenv("7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
-CHAT_ID = os.getenv("8193355200")
+# Получаем токен и чат ID из переменных окружения
+TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+# Проверяем, что переменные окружения заданы
+if not TOKEN or not CHAT_ID:
+    raise ValueError("BOT_TOKEN и CHAT_ID должны быть заданы в переменных окружения")
+
 DMB_DATE = datetime(2025, 6, 25)
 
 bot = Bot(token=TOKEN)
