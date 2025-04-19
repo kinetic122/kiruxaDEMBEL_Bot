@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Токен бота
 API_TOKEN = os.getenv("7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
-CHAT_ID = int(os.getenv("8193355200"))
+CHAT_ID = int(os.getenv("CHAT_ID"))
 DMB_DATE = datetime(2025, 6, 25)
 
 bot = telebot.TeleBot(API_TOKEN)
