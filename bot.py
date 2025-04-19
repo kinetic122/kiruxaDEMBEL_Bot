@@ -27,7 +27,15 @@ def get_game_days():
             f.write("0")
         return 0
     with open(GAME_FILE, "r") as f:
-        return int(f.read().strip())
+        content = f.read().strip()
+        if content.isdigit() or (content.startswith('-') and content[1:].isdigit()):
+            return int(content)
+        else:
+            # Если файл повреждён или пустой — обнуляем
+            with open(GAME_FILE, "w") as f:
+                f.write("0")
+            return 0
+
 
 def update_game_days(change):
     current = get_game_days()
