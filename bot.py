@@ -1,37 +1,42 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
-from datetime import datetime
-import asyncio
+import telebot
 import os
+import time
+from datetime import datetime
 
-# Получаем токен и чат ID из переменных окружения
-TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-
-# Проверяем, что переменные окружения заданы
-if not TOKEN or not CHAT_ID:
-    raise ValueError("BOT_TOKEN и CHAT_ID должны быть заданы в переменных окружения")
-
+# Токен бота
+API_TOKEN = os.getenv("7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
+CHAT_ID = int(os.getenv("8193355200"))
 DMB_DATE = datetime(2025, 6, 25)
 
-bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+bot = telebot.TeleBot(API_TOKEN)
 
-@dp.message_handler(commands=['dembel'])
-async def dmb_command(message: types.Message):
-    days_left = (DMB_DATE - datetime.now()).days
-    await message.reply(f"Кирюхе до дембеля осталось {days_left} дней")
+# Функция для расчета количества дней до дембеля
+def days_until_demob():
+    today = datetime.now()
+    delta = DMB_DATE - today
+    return delta.days
 
-async def daily_message():
+# Обработчик команды /dembel
+@bot.message_handler(commands=["dembel"])
+def handle_dmb_command(message):
+    days_left = days_until_demob()
+    bot.reply_to(message, f"До дембеля Кирюхи осталось {days_left} дней.")
+
+# Отправка ежедневного сообщения
+def send_daily_message():
     while True:
         now = datetime.now()
         if now.hour == 9 and now.minute == 0:
-            days_left = (DMB_DATE - now).days
-            await bot.send_message(chat_id=CHAT_ID, text=f"Доброе утро! До дембеля Кирюхи осталось {days_left} дней 💪")
-            await asyncio.sleep(60)
-        await asyncio.sleep(30)
+            days_left = days_until_demob()
+            bot.send_message(CHAT_ID, f"Доброе утро! До дембеля Кирюхи осталось {days_left} дней 💪")
+            time.sleep(60)  # Отправлять сообщение каждое утро в 9:00
+        time.sleep(30)  # Проверять раз в 30 секунд
 
-async def on_startup(dp):
-    asyncio.create_task(daily_message())
+# Запуск бота
+if __name__ == '__main__':
+    # Запуск бота в отдельном потоке для обработки команд
+    import threading
+    threading.Thread(target=send_daily_message, daemon=True).start()
 
-executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    # Запуск бота для обработки команд /dembel
+    bot.polling(none_stop=True)
