@@ -19,7 +19,9 @@ def get_updates(offset=None):
 def send_message(text):
     url = f"{API_URL}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": text}
-    requests.post(url, data=data)
+    response = requests.post(url, data=data)
+    print(f"Sent message: {text}")
+    print(f"Response status: {response.status_code}, Response: {response.text}")
 
 def handle_command(message_text):
     if "/dembel" in message_text:
@@ -28,20 +30,27 @@ def handle_command(message_text):
 
 def run_bot():
     print("Бот запущен...")
+    print(f"BOT_TOKEN: {BOT_TOKEN}")
+    print(f"CHAT_ID: {CHAT_ID}")
+    print(f"DMB_DATE: {DMB_DATE}")
+
     last_update_id = None
     sent_today = False
 
     while True:
         # Обработка команды
         updates = get_updates(offset=last_update_id)
+        print(f"Updates received: {updates}")  # Логируем полученные обновления
         if updates["ok"] and updates["result"]:
             for update in updates["result"]:
                 last_update_id = update["update_id"] + 1
                 if "message" in update and "text" in update["message"]:
+                    print(f"Message received: {update['message']['text']}")  # Логируем полученное сообщение
                     handle_command(update["message"]["text"])
 
         # Авто-сообщение утром
         now = datetime.now()
+        print(f"Current time: {now}")  # Логируем текущее время
         if now.hour == 9 and not sent_today:
             days_left = (DMB_DATE - now).days
             send_message(f"Доброе утро! До дембеля Кирюхи осталось {days_left} дней 💪")
