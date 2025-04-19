@@ -55,11 +55,7 @@ def weighted_random_change():
 def handle_command(message_text):
     text = message_text.lower()
 
-    if "/dembel" in text:
-        days_left = (DMB_DATE - datetime.now()).days
-        send_message(f"Кирюхе до дембеля осталось {days_left} дней")
-
-    elif "/dembelgame" in text:
+    if "/dembelgame" in text:
         change = weighted_random_change()
         current = get_game_days()
         if change < 0 and abs(change) > current:
@@ -73,6 +69,11 @@ def handle_command(message_text):
         else:
             real_days = (DMB_DATE - datetime.now()).days + total
             send_message(f"Нихуя не поменялось, Кирюхе осталось {real_days} дней 👀")
+
+    elif "/dembel" in text:
+        days_left = (DMB_DATE - datetime.now()).days
+        send_message(f"Кирюхе до дембеля осталось {days_left} дней")
+
 
 def run_bot():
     print("Бот запущен...")
