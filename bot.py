@@ -1,42 +1,55 @@
-import telebot
 import os
 import time
+import requests
 from datetime import datetime
 
-# Токен бота
-API_TOKEN = os.getenv("7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
-CHAT_ID = int(os.getenv("CHAT_ID"))
+# Можно либо указать прямо здесь, либо через os.environ
+BOT_TOKEN = os.getenv("BOT_TOKEN", "твой_токен")
+CHAT_ID = os.getenv("CHAT_ID", "твой_чат_id")
 DMB_DATE = datetime(2025, 6, 25)
 
-bot = telebot.TeleBot(API_TOKEN)
+API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-# Функция для расчета количества дней до дембеля
-def days_until_demob():
-    today = datetime.now()
-    delta = DMB_DATE - today
-    return delta.days
+def get_updates(offset=None):
+    url = f"{API_URL}/getUpdates"
+    params = {"timeout": 100, "offset": offset}
+    response = requests.get(url, params=params)
+    return response.json()
 
-# Обработчик команды /dembel
-@bot.message_handler(commands=["dembel"])
-def handle_dmb_command(message):
-    days_left = days_until_demob()
-    bot.reply_to(message, f"До дембеля Кирюхи осталось {days_left} дней.")
+def send_message(text):
+    url = f"{API_URL}/sendMessage"
+    data = {"chat_id": CHAT_ID, "text": text}
+    requests.post(url, data=data)
 
-# Отправка ежедневного сообщения
-def send_daily_message():
+def handle_command(message_text):
+    if "/dembel" in message_text:
+        days_left = (DMB_DATE - datetime.now()).days
+        send_message(f"Кирюхе до дембеля осталось {days_left} дней")
+
+def run_bot():
+    print("Бот запущен...")
+    last_update_id = None
+    sent_today = False
+
     while True:
+        # Обработка команды
+        updates = get_updates(offset=last_update_id)
+        if updates["ok"] and updates["result"]:
+            for update in updates["result"]:
+                last_update_id = update["update_id"] + 1
+                if "message" in update and "text" in update["message"]:
+                    handle_command(update["message"]["text"])
+
+        # Авто-сообщение утром
         now = datetime.now()
-        if now.hour == 9 and now.minute == 0:
-            days_left = days_until_demob()
-            bot.send_message(CHAT_ID, f"Доброе утро! До дембеля Кирюхи осталось {days_left} дней 💪")
-            time.sleep(60)  # Отправлять сообщение каждое утро в 9:00
-        time.sleep(30)  # Проверять раз в 30 секунд
+        if now.hour == 9 and not sent_today:
+            days_left = (DMB_DATE - now).days
+            send_message(f"Доброе утро! До дембеля Кирюхи осталось {days_left} дней 💪")
+            sent_today = True
+        if now.hour == 0:
+            sent_today = False
 
-# Запуск бота
-if __name__ == '__main__':
-    # Запуск бота в отдельном потоке для обработки команд
-    import threading
-    threading.Thread(target=send_daily_message, daemon=True).start()
+        time.sleep(2)
 
-    # Запуск бота для обработки команд /dembel
-    bot.polling(none_stop=True)
+if __name__ == "__main__":
+    run_bot()
