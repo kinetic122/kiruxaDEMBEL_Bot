@@ -41,10 +41,10 @@ def weighted_random_change():
         return 0  # 20% шанс, что ничего не поменяется
 
     weights = {
-        range(1, 11): 50,
-        range(11, 31): 25,
-        range(31, 101): 15,
-        range(101, 366): 10
+        range(1, 11): 70,
+        range(11, 31): 20,
+        range(31, 101): 5,
+        range(101, 366): 1
     }
     ranges = list(weights.keys())
     chances = list(weights.values())
