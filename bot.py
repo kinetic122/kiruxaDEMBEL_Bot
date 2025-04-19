@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 
 # Можно либо указать прямо здесь, либо через os.environ
-BOT_TOKEN = os.getenv("BOT_TOKEN", "твой_токен")
-CHAT_ID = os.getenv("CHAT_ID", "твой_чат_id")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
+CHAT_ID = os.getenv("CHAT_ID", "-1002632304229")
 DMB_DATE = datetime(2025, 6, 25)
 
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
