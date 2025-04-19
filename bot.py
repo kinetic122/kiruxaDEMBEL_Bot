@@ -37,8 +37,8 @@ def update_game_days(change):
     return new_total
 
 def weighted_random_change():
-    if random.random() < 0.2:  # 20% шанс, что ничего не изменится
-        return 0
+    if random.random() < 0.2:
+        return 0  # 20% шанс, что ничего не поменяется
 
     weights = {
         range(1, 11): 50,
@@ -53,11 +53,13 @@ def weighted_random_change():
     return random.choice([-1, 1]) * value
 
 def handle_command(message_text):
-    if "/dembel" in message_text:
+    text = message_text.lower()
+
+    if "/dembel" in text:
         days_left = (DMB_DATE - datetime.now()).days
         send_message(f"Кирюхе до дембеля осталось {days_left} дней")
 
-    elif "/dembelGAME" in message_text:
+    elif "/dembelgame" in text:
         change = weighted_random_change()
         current = get_game_days()
         if change < 0 and abs(change) > current:
