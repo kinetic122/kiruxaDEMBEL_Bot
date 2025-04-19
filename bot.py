@@ -1,14 +1,14 @@
 import os
 import time
 import requests
-import random
 from datetime import datetime
+import random
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
 CHAT_ID = os.getenv("CHAT_ID", "-1002632304229")
 DMB_DATE = datetime(2025, 6, 25)
+
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-GAME_FILE = "game_days.txt"
 
 def get_updates(offset=None):
     url = f"{API_URL}/getUpdates"
@@ -22,43 +22,55 @@ def send_message(text):
     requests.post(url, data=data)
 
 def get_game_days():
-    if not os.path.exists(GAME_FILE):
-        with open(GAME_FILE, "w") as f:
+    if not os.path.exists("game_days.txt"):
+        with open("game_days.txt", "w") as f:
             f.write("0")
-        return 0
-    with open(GAME_FILE, "r") as f:
+    with open("game_days.txt", "r") as f:
         content = f.read().strip()
-        if content.isdigit() or (content.startswith('-') and content[1:].isdigit()):
-            return int(content)
-        else:
-            # Если файл повреждён или пустой — обнуляем
-            with open(GAME_FILE, "w") as f:
-                f.write("0")
-            return 0
-
+        return int(content) if content else 0
 
 def update_game_days(change):
     current = get_game_days()
-    new_value = current + change
-    with open(GAME_FILE, "w") as f:
-        f.write(str(new_value))
-    return new_value
+    new_total = max(current + change, 0)
+    with open("game_days.txt", "w") as f:
+        f.write(str(new_total))
+    return new_total
+
+def weighted_random_change():
+    if random.random() < 0.2:  # 20% шанс, что ничего не изменится
+        return 0
+
+    weights = {
+        range(1, 11): 50,
+        range(11, 31): 25,
+        range(31, 101): 15,
+        range(101, 366): 10
+    }
+    ranges = list(weights.keys())
+    chances = list(weights.values())
+    chosen_range = random.choices(ranges, weights=chances)[0]
+    value = random.choice(list(chosen_range))
+    return random.choice([-1, 1]) * value
 
 def handle_command(message_text):
-    if "/dembel" in message_text and "GAME" not in message_text:
+    if "/dembel" in message_text:
         days_left = (DMB_DATE - datetime.now()).days
         send_message(f"Кирюхе до дембеля осталось {days_left} дней")
 
     elif "/dembelGAME" in message_text:
-        change = random.randint(-365, 365)
+        change = weighted_random_change()
+        current = get_game_days()
+        if change < 0 and abs(change) > current:
+            change = -current
         total = update_game_days(change)
+
         if change > 0:
-            msg = f"Упс! К дембелю добавлено {change} дней 😅\nОбщий игровой счётчик: {total} дней"
+            send_message(f"Упс! К дембелю добавлено {change} дней! 😂\nОсталось дней😂: {total}")
         elif change < 0:
-            msg = f"Заебись! Дней до дембеля стало меньше на {abs(change)} 💥\nОбщий игровой счётчик: {total} дней"
+            send_message(f"Заебись! Дней до дембеля стало меньше на {abs(change)} дней! 🔥\nОсталось дней😂: {total}")
         else:
-            msg = f"Ничего не изменилось, баффов не завезли 🙃\nОбщий игровой счётчик: {total} дней"
-        send_message(msg)
+            real_days = (DMB_DATE - datetime.now()).days + total
+            send_message(f"Нихуя не поменялось, Кирюхе осталось {real_days} дней 👀")
 
 def run_bot():
     print("Бот запущен...")
