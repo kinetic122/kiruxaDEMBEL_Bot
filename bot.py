@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 import random
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "7997057858:AAGeQc_0GaFfok0xN4BrbDr2QaDzYVgc_8s")
-CHAT_ID = os.getenv("CHAT_ID", "-1002632304229")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+CHAT_ID = os.getenv("CHAT_ID", "")
 DMB_DATE = datetime(2025, 6, 25)
 
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
